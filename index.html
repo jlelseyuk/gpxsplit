@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>GPX Route Splitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, sans-serif;
+        }
+        header {
+            padding: 10px;
+            background: #111827;
+            color: white;
+        }
+        header h1 {
+            font-size: 18px;
+            margin-bottom: 0.5rem;
+        }
+        header .subtitle {
+            font-size: 14px;
+            margin-top: 0.5rem;
+        }
+        #controls {
+            padding: 10px;
+        }
+        #status {
+            display: block;
+            color: #1F66AD;
+            margin-bottom: 10px;
+        }
+        .form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #map {
+            height: calc(100vh - 242px);
+        }
+        .form label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        .form input {
+            flex-grow: 1;
+            border: dashed 2px #9bc3ec;
+            padding: 10px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .form button {
+            width: 240px;
+            height: 44px;
+            padding: 10px;
+            border: none;
+            background-color: #1F66AD;
+            color: white;
+            cursor: pointer;
+        }
+        .form button:disabled {
+            color: #333333;
+            background-color: #bbbbbb;
+            cursor: default;
+        }
+        @media (max-width: 639px) {
+            #status {
+                margin-bottom: 14px;
+            }
+            .form {
+                flex-direction: column;
+                align-items: start;
+            }
+            .form input {
+                width: calc(100% - 24px);
+            }
+            .form button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>GPX Route Splitter</h1>
+    <p class="subtitle">Developed by James Elsey</p>
+</header>
+
+<main>
+
+<div id="controls">
+    <span id="status">Step 1: Upload a GPX file</span>
+    <div class="form">
+        <label for="gpxInput">GPX File:</label>
+        <input id="gpxInput" type="file" accept=".gpx">
+        <button id="exportBtn" disabled>Export Split GPX Files</button>
+    </div>
+</div>
+
+<div id="map"></div>
+
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    const map = L.map('map').setView([0, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let routeLayer;
+    let routePoints = [];
+    let splitMarker = null;
+
+    document.getElementById('gpxInput').addEventListener('change', handleFile);
+    document.getElementById('exportBtn').addEventListener('click', exportGPX);
+
+    function handleFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => parseGPX(reader.result);
+        reader.readAsText(file);
+    }
+
+    function parseGPX(text) {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, 'application/xml');
+        const trkpts = [...xml.getElementsByTagName('trkpt')];
+
+        routePoints = trkpts.map(pt => [
+            parseFloat(pt.getAttribute('lat')),
+            parseFloat(pt.getAttribute('lon'))
+        ]);
+
+        if (routeLayer) map.removeLayer(routeLayer);
+        routeLayer = L.polyline(routePoints, { color: 'blue' }).addTo(map);
+        map.fitBounds(routeLayer.getBounds());
+
+        map.on('click', addSplitPoint);
+        document.getElementById('status').textContent = 'Step 2: Click on the map to add a split point';
+    }
+
+    function addSplitPoint(e) {
+        if (splitMarker) map.removeLayer(splitMarker);
+
+        const nearestIndex = findNearestPointIndex(e.latlng);
+        const nearestPoint = routePoints[nearestIndex];
+
+        splitMarker = L.marker(nearestPoint, { draggable: false })
+            .addTo(map)
+            .bindPopup('Split Point')
+            .openPopup();
+
+        splitMarker._routeIndex = nearestIndex;
+
+        document.getElementById('exportBtn').disabled = false;
+        document.getElementById('status').textContent = 'Step 3: Split point added. You can now export...';
+    }
+
+    function findNearestPointIndex(latlng) {
+        let minDist = Infinity;
+        let idx = 0;
+
+        routePoints.forEach((pt, i) => {
+            const d = map.distance(latlng, L.latLng(pt));
+            if (d < minDist) {
+                minDist = d;
+                idx = i;
+            }
+        });
+        return idx;
+    }
+
+    function exportGPX() {
+        const splitIndex = splitMarker._routeIndex;
+
+        const originalFile = document.getElementById('gpxInput').files[0];
+        if (!originalFile) return;
+
+        const baseName = originalFile.name.replace(/\.gpx$/i, '');
+
+        const part1 = routePoints.slice(0, splitIndex + 1);
+        const part2 = routePoints.slice(splitIndex);
+
+        downloadGPX(part1, `${baseName}_to_split.gpx`);
+        downloadGPX(part2, `${baseName}_to_end.gpx`);
+    }
+
+    function downloadGPX(points, filename) {
+        const gpx = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="GPX Splitter">\n<trk><trkseg>\n${
+            points.map(p => `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('\n')
+        }\n</trkseg></trk></gpx>`;
+
+        const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+    }
+</script>
+
+</body>
+</html>
