@@ -7,13 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="shortcut icon" href="/favicon.ico">
 
     <style>
         body {
+            font-family: "Figtree", "Arial", "Helvetica", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 16px;
             margin: 0;
-            font-family: system-ui, sans-serif;
         }
         header {
             padding: 10px;
@@ -21,74 +30,101 @@
             color: white;
         }
         header h1 {
-            font-size: 18px;
+            font-size: 28px;
             margin-bottom: 0.5rem;
         }
         header .subtitle {
-            font-size: 14px;
+            font-size: 18px;
             margin-top: 0.5rem;
         }
-        #controls {
+        header .subtitle a {
+            color: #ffffff;
+            /*text-decoration: none;*/
+            transition: all 300ms ease-in-out;
+        }
+        header .subtitle a:hover {
+            color: #0975dc;
+        }
+        .controls {
             padding: 10px;
         }
-        #status {
+        .controls #status {
             display: block;
-            color: #1F66AD;
+            color: #0975dc;
             margin-bottom: 10px;
         }
-        .form {
+        .controls .upload-form {
             display: flex;
-            gap: 10px;
+            flex-direction: row;
+            gap: 16px;
+            font-family: "Figtree", "Arial", "Helvetica", sans-serif;
+        }
+        .controls .upload-form .file-upload input[type="file"] {
+            display: none;
+        }
+        .controls .upload-form .file-upload {
+            display: flex;
             align-items: center;
+            border: 2px dotted #a0bed9;
+            border-radius: 8px;
+            padding: 6px;
+            cursor: pointer;
+            flex-grow: 1;
+            transition: all 300ms ease-in-out;
+        }
+        .controls .upload-form .file-upload:hover {
+            border-color: #0975dc;
+        }
+        .controls .upload-form .file-upload-button {
+            background-color: #0975dc;
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .controls .upload-form .file-upload:hover .file-upload-button {
+            background-color: #075fb3;
+        }
+        .controls .upload-form .file-upload .file-upload-text {
+            margin-left: 12px;
+            font-size: 14px;
+            color: #555;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .controls .upload-form .submit-button {
+            background-color: #0975dc;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 300ms ease-in-out;
+        }
+        .controls .upload-form .submit-button:hover {
+            background-color: #075fb3;
+        }
+        .controls .upload-form .submit-button:disabled {
+            background-color: #a8a8a8;
+        }
+        .controls .upload-form .submit-button:disabled:hover {
+            cursor: default;
+            background-color: #a8a8a8;
         }
         #map {
             height: calc(100vh - 242px);
         }
-        .form label {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
-        .form input {
-            flex-grow: 1;
-            border: dashed 2px #9bc3ec;
-            padding: 10px;
-            height: 20px;
-            cursor: pointer;
-        }
-        .form button {
-            width: 240px;
-            height: 44px;
-            padding: 10px;
-            border: none;
-            background-color: #1F66AD;
-            color: white;
-            cursor: pointer;
-        }
-        .form button:disabled {
-            color: #333333;
-            background-color: #bbbbbb;
-            cursor: default;
-        }
-        @media (max-width: 639px) {
-            #status {
-                margin-bottom: 14px;
-            }
-            .form {
+        @media (max-width: 767px) {
+            .controls .upload-form {
+                display: flex;
+                gap: 8px;
                 flex-direction: column;
-                align-items: start;
-            }
-            .form input {
-                width: calc(100% - 24px);
-            }
-            .form button {
-                width: 100%;
             }
         }
     </style>
@@ -98,18 +134,23 @@
 
 <header>
     <h1>GPX Route Splitter</h1>
-    <p class="subtitle">Developed by James Elsey</p>
+    <p class="subtitle">Developed by <a href="https://www.jameselsey.com" target="_blank">James Elsey</a></p>
 </header>
 
 <main>
 
-<div id="controls">
+<div class="controls">
     <span id="status">Step 1: Upload a GPX file</span>
-    <div class="form">
-        <label for="gpxInput">GPX File:</label>
-        <input id="gpxInput" type="file" accept=".gpx">
-        <button id="exportBtn" disabled>Export Split GPX Files</button>
-    </div>
+    <form class="upload-form">
+        <label class="file-upload">
+            <input id="gpxInput" type="file" name="file">
+            <span class="file-upload-button">Choose GPX File</span>
+            <span class="file-upload-text">No file chosen...</span>
+        </label>
+        <button id="exportBtn" type="submit" class="submit-button" disabled>
+            Export Split GPX Files
+        </button>
+    </form>
 </div>
 
 <div id="map"></div>
@@ -134,6 +175,15 @@
     function handleFile(e) {
         const file = e.target.files[0];
         if (!file) return;
+
+        document.querySelector('.file-upload-text').textContent = file.name;
+
+        if (splitMarker) {
+            map.removeLayer(splitMarker);
+            splitMarker = null;
+        }
+
+        document.getElementById('exportBtn').disabled = true;
 
         const reader = new FileReader();
         reader.onload = () => parseGPX(reader.result);
