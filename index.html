@@ -120,6 +120,9 @@
         #map {
             height: calc(100vh - 242px);
         }
+        #map .leaflet-popup-content {
+            text-align: center;
+        }
         @media (max-width: 767px) {
             .controls .upload-form {
                 display: flex;
@@ -161,16 +164,41 @@
 
 <script>
     const map = L.map('map').setView([0, 0], 2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
 
     let routeLayer;
     let routePoints = [];
+    let startMarker = null;
     let splitMarker = null;
+    let endMarker = null;
 
-    document.getElementById('gpxInput').addEventListener('change', handleFile);
-    document.getElementById('exportBtn').addEventListener('click', exportGPX);
+    const startIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+    const splitIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+    const endIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
 
     function handleFile(e) {
         const file = e.target.files[0];
@@ -201,7 +229,13 @@
         ]);
 
         if (routeLayer) map.removeLayer(routeLayer);
+        if (startMarker) map.removeLayer(startMarker);
+        if (endMarker) map.removeLayer(endMarker);
+
         routeLayer = L.polyline(routePoints, { color: 'blue' }).addTo(map);
+        startMarker = L.marker(routePoints[0], { icon: startIcon }).addTo(map).bindPopup('Start');
+        endMarker = L.marker(routePoints[routePoints.length - 1], { icon: endIcon }).addTo(map).bindPopup('End');
+
         map.fitBounds(routeLayer.getBounds());
 
         map.on('click', addSplitPoint);
@@ -214,10 +248,7 @@
         const nearestIndex = findNearestPointIndex(e.latlng);
         const nearestPoint = routePoints[nearestIndex];
 
-        splitMarker = L.marker(nearestPoint, { draggable: false })
-            .addTo(map)
-            .bindPopup('Split Point')
-            .openPopup();
+        splitMarker = L.marker(nearestPoint, { icon: splitIcon, draggable: false }).addTo(map).bindPopup('Split Point').openPopup();
 
         splitMarker._routeIndex = nearestIndex;
 
@@ -265,6 +296,9 @@
         a.download = filename;
         a.click();
     }
+
+    document.getElementById('gpxInput').addEventListener('change', handleFile);
+    document.getElementById('exportBtn').addEventListener('click', exportGPX);
 </script>
 
 </body>
