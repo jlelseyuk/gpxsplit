@@ -65,6 +65,14 @@
             border-radius: 5px;
             transition: width 0.5s ease-in-out;
         }
+        @keyframes flash {
+            0% { background-color: #0975dc; }
+            50% { background-color: #33a1ff; }
+            100% { background-color: #0975dc; }
+        }
+        .controls .step-bar .step-fill.flash {
+            animation: flash 0.5s ease-in-out;
+        }
         .controls #status {
             display: block;
             color: #0975dc;
@@ -155,7 +163,7 @@
 <header>
     <h1>GPX Route Splitter</h1>
     <p class="subtitle">Developed by <a href="https://www.jameselsey.com" target="_blank">James Elsey</a></p>
-    <p class="small">Upload your GPX file and choose a split point, once ready click to download the files.</p>
+    <p class="small">Upload your GPX file and choose up to 3 split points (4 parts), then export.</p>
 </header>
 
 <main>
@@ -191,8 +199,8 @@
     let routeLayer;
     let routePoints = [];
     let startMarker = null;
-    let splitMarker = null;
     let endMarker = null;
+    let splitMarkers = [];
 
     const startIcon = new L.Icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -223,18 +231,32 @@
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    function setStep(step) {
+    function setStep(stage) {
         const fill = document.getElementById('stepFill');
-        if (step === 1) {
-            fill.style.width = '33%';
-            document.getElementById('status').innerHTML = '<strong>Step 1:</strong> Upload a GPX file';
-        } else if (step === 2) {
-            fill.style.width = '66%';
-            document.getElementById('status').innerHTML = '<strong>Step 2:</strong> Click on the map to add a split point';
-        } else if (step === 3) {
-            fill.style.width = '100%';
-            document.getElementById('status').innerHTML = '<strong>Step 3:</strong> Split point added. You can now export!';
+        let width = '0%';
+        let statusText = '';
+
+        switch (stage) {
+            case 1:
+                width = '33%';
+                statusText = 'Step 1: Ready to upload a GPX file.';
+                break;
+            case 2:
+                width = '66%';
+                statusText = 'Step 2: GPX uploaded. Click on the map to add up to 3 split points.';
+                break;
+            case 3:
+                width = '100%';
+                statusText = 'Step 3: Split point(s) added. Ready to export!';
+                break;
         }
+
+        fill.style.width = width;
+        document.getElementById('status').textContent = statusText;
+
+        fill.classList.remove('flash');
+        void fill.offsetWidth;
+        fill.classList.add('flash');
     }
 
     function handleFile(e) {
@@ -243,12 +265,14 @@
 
         document.querySelector('.file-upload-text').textContent = file.name;
 
-        if (splitMarker) {
-            map.removeLayer(splitMarker);
-            splitMarker = null;
-        }
+        splitMarkers.forEach(m => map.removeLayer(m));
+        splitMarkers = [];
+        if (startMarker) map.removeLayer(startMarker);
+        if (endMarker) map.removeLayer(endMarker);
+        if (routeLayer) map.removeLayer(routeLayer);
 
         document.getElementById('exportBtn').disabled = true;
+        setStep(1);
 
         const reader = new FileReader();
         reader.onload = () => parseGPX(reader.result);
@@ -265,40 +289,51 @@
             parseFloat(pt.getAttribute('lon'))
         ]);
 
-        if (routeLayer) map.removeLayer(routeLayer);
-        if (startMarker) map.removeLayer(startMarker);
-        if (endMarker) map.removeLayer(endMarker);
-
         routeLayer = L.polyline(routePoints, { color: 'blue' }).addTo(map);
         startMarker = L.marker(routePoints[0], { icon: startIcon }).addTo(map).bindPopup('Start');
         endMarker = L.marker(routePoints[routePoints.length - 1], { icon: endIcon }).addTo(map).bindPopup('End');
 
         map.fitBounds(routeLayer.getBounds());
-
-        map.on('click', addSplitPoint);
+        map.on('click', handleSplitClick);
 
         setStep(2);
     }
 
-    function addSplitPoint(e) {
-        if (splitMarker) map.removeLayer(splitMarker);
+    function updateStepBar() {
+        if (splitMarkers.length === 0) {
+            setStep(2);
+        } else {
+            setStep(3);
+        }
+    }
+
+    function handleSplitClick(e) {
+        if (splitMarkers.length >= 3) return;
 
         const nearestIndex = findNearestPointIndex(e.latlng);
         const nearestPoint = routePoints[nearestIndex];
 
-        splitMarker = L.marker(nearestPoint, { icon: splitIcon, draggable: false }).addTo(map).bindPopup('Split Point').openPopup();
+        const marker = L.marker(nearestPoint, { icon: splitIcon, draggable: false })
+            .addTo(map)
+            .bindPopup(`Split ${splitMarkers.length + 1}`)
+            .openPopup();
+        marker._routeIndex = nearestIndex;
 
-        splitMarker._routeIndex = nearestIndex;
+        marker.on('click', () => {
+            map.removeLayer(marker);
+            splitMarkers = splitMarkers.filter(m => m !== marker);
+            updateStepBar();
+            document.getElementById('exportBtn').disabled = splitMarkers.length === 0;
+        });
 
+        splitMarkers.push(marker);
+        updateStepBar();
         document.getElementById('exportBtn').disabled = false;
-
-        setStep(3);
     }
 
     function findNearestPointIndex(latlng) {
         let minDist = Infinity;
         let idx = 0;
-
         routePoints.forEach((pt, i) => {
             const d = map.distance(latlng, L.latLng(pt));
             if (d < minDist) {
@@ -310,18 +345,24 @@
     }
 
     function exportGPX() {
-        const splitIndex = splitMarker._routeIndex;
-
+        if (splitMarkers.length === 0) return;
         const originalFile = document.getElementById('gpxInput').files[0];
         if (!originalFile) return;
-
         const baseName = originalFile.name.replace(/\.gpx$/i, '');
 
-        const part1 = routePoints.slice(0, splitIndex + 1);
-        const part2 = routePoints.slice(splitIndex);
+        const indexes = splitMarkers.map(m => m._routeIndex).sort((a, b) => a - b);
 
-        downloadGPX(part1, `${baseName}_to_split.gpx`);
-        downloadGPX(part2, `${baseName}_to_end.gpx`);
+        const segments = [];
+        let startIdx = 0;
+        indexes.forEach((idx) => {
+            segments.push(routePoints.slice(startIdx, idx + 1));
+            startIdx = idx;
+        });
+        segments.push(routePoints.slice(startIdx));
+
+        segments.forEach((pts, i) => {
+            downloadGPX(pts, `${baseName}_part${i + 1}.gpx`);
+        });
     }
 
     function downloadGPX(points, filename) {
@@ -336,10 +377,10 @@
         a.click();
     }
 
-    setStep(1);
-
     document.getElementById('gpxInput').addEventListener('change', handleFile);
     document.getElementById('exportBtn').addEventListener('click', exportGPX);
+
+    setStep(1);
 </script>
 
 </body>
