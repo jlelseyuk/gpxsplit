@@ -29,23 +29,26 @@
             background: #111827;
             color: white;
         }
-        header h1 {
+        header .title {
+            display: flex;
+            align-items: center;
+            flex-direction: row-reverse;
+            justify-content: start;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+        header .title h1 {
             font-size: 28px;
-            margin-bottom: 0.5rem;
+            margin: 0;
         }
-        header .subtitle {
-            font-size: 18px;
-            margin: 0.5rem 0;
-        }
-        header .subtitle a {
-            color: #ffffff;
-            transition: all 300ms ease-in-out;
-        }
-        header .subtitle a:hover {
-            color: #0975dc;
+        header .title img {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
         }
         header .small {
             font-size: 14px;
+            margin-bottom: .3rem;
         }
         .controls {
             padding: 10px;
@@ -142,17 +145,37 @@
             cursor: default;
             background-color: #a8a8a8;
         }
-        #map {
-            height: calc(100vh - 242px);
+        .map-wrapper #map {
+            height: calc(100vh - 410px);
         }
-        #map .leaflet-popup-content {
+        .map-wrapper #map .leaflet-popup-content {
             text-align: center;
+        }
+        footer {
+            color: #ffffff;
+            background-color: #0975dc;
+            padding: 5px;
+        }
+        footer .subtitle {
+            font-size: 14px;
+            text-align: center;
+            margin: .5rem 0;
+        }
+        footer .subtitle a {
+            color: #ffffff;
+            transition: all 300ms ease-in-out;
+        }
+        footer .subtitle a:hover {
+            opacity: .6;
         }
         @media (max-width: 767px) {
             .controls .upload-form {
                 display: flex;
                 gap: 8px;
                 flex-direction: column;
+            }
+            .map-wrapper {
+                padding: 10px;
             }
         }
     </style>
@@ -161,9 +184,14 @@
 <body>
 
 <header>
-    <h1>GPX Route Splitter</h1>
-    <p class="subtitle">Developed by <a href="https://www.jameselsey.com" target="_blank">James Elsey</a></p>
-    <p class="small">Upload your GPX file and choose up to 3 split points (4 parts), then export.</p>
+    <div class="title">
+        <h1>GPX Route Splitter</h1>
+        <img src="logo.png" alt="GPX Route Splitter" loading="eager">
+    </div>
+    <p class="small">
+        Upload your GPX file and choose up to 3 split points, the original route will then be split into sequential
+        parts when you click to export.
+    </p>
 </header>
 
 <main>
@@ -187,9 +215,17 @@
     </form>
 </div>
 
-<div id="map"></div>
+<div class="map-wrapper">
+    <div id="map"></div>
+</div>
 
 </main>
+
+<footer>
+    <p class="subtitle">
+        Developed by <a href="https://www.jameselsey.com" target="_blank">James Elsey</a>
+    </p>
+</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -243,7 +279,7 @@
                 break;
             case 2:
                 width = '66%';
-                statusText = 'Step 2: GPX uploaded. Click on the map to add up to 3 split points.';
+                statusText = 'Step 2: GPX uploaded. Click on the map to add/remove up to 3 split points.';
                 break;
             case 3:
                 width = '100%';
