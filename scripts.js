@@ -202,8 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         segments.push(routePoints.slice(startIdx));
 
         segments.forEach((pts, i) => {
-            const filename = `Part ${downloadCounter}: ${baseName}_part${downloadCounter}.gpx`;
-            downloadCounter++;
+            const filename = `${baseName}-Part-${downloadCounter}.gpx`;
             const blob = generateGPXBlob(pts);
             const url = URL.createObjectURL(blob);
             const sizeKB = (blob.size / 1024).toFixed(1);
@@ -213,9 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
             link.download = filename;
 
             link.innerHTML = `
-                <span>${filename}</span>
+                <span>Part ${downloadCounter}: ${filename}</span>
                 <span class="filesize">${sizeKB} KB</span>
             `;
+
+            downloadCounter++;
 
             downloadList.appendChild(link);
         });
@@ -226,9 +227,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setStep(3);
     }
 
-    function generateGPXBlob(points) {
-        const gpx = `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPX Route Splitter"><trk><trkseg>${points.map(p => `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('\n')}</trkseg></trk></gpx>`;
-
+    function generateGPXBlob(points, partNumber = 1, baseName = "Route") {
+        const gpx = `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPX Route Splitter" xmlns="http://www.topografix.com/GPX/1/1"><metadata><name>${baseName} - Part ${partNumber}</name></metadata><trk><name>${baseName} - Part ${partNumber}</name><trkseg>${points.map(p => `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('\n')}</trkseg></trk></gpx>`;
         return new Blob([gpx], {type: 'application/gpx+xml'});
     }
 
