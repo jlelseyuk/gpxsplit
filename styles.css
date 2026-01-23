@@ -36,7 +36,8 @@ header .title img {
 }
 header .small {
     font-size: 14px;
-    margin-bottom: .3rem;
+    margin-bottom: 10px;
+    line-height: 1.4;
 }
 .controls {
     padding: 10px;
@@ -47,7 +48,7 @@ header .small {
     background-color: #ddd;
     border-radius: 5px;
     overflow: hidden;
-    margin-bottom: 10px;
+    margin: 8px 0;
 }
 .controls .step-bar .step-fill {
     height: 100%;
@@ -177,6 +178,9 @@ header .small {
     font-size: 13px;
     min-width: 50px;
 }
+.map-wrapper {
+    padding: 10px;
+}
 .map-wrapper #map {
     height: calc(100vh - 410px);
     border-radius: 6px;
@@ -209,8 +213,5 @@ footer .subtitle a:hover {
     }
     .controls .reset-link {
         width: 100%;
-    }
-    .map-wrapper {
-        padding: 10px;
     }
 }
