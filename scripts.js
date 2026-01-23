@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let splitMarkers = [];
 
     let hasExported = false;
+    let downloadCounter = 1;
 
     const startIcon = new L.Icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -48,22 +49,26 @@ document.addEventListener('DOMContentLoaded', () => {
         let statusText = '';
 
         switch (stage) {
+            case 0:
+                width = '10%';
+                statusText = '<strong>Step 1:</strong> Ready to upload a GPX file.';
+                break;
             case 1:
-                width = '33%';
-                statusText = 'Step 1: Ready to upload a GPX file.';
+                width = '40%';
+                statusText = '<strong>Step 2:</strong> GPX uploaded. Click on the map to add up to 3 split points.';
                 break;
             case 2:
-                width = '66%';
-                statusText = 'Step 2: GPX uploaded. Click on the map to add/remove up to 3 split points.';
+                width = '70%';
+                statusText = '<strong>Step 3:</strong> Split point(s) added. Ready to export!';
                 break;
             case 3:
                 width = '100%';
-                statusText = 'Step 3: Split point(s) added. Ready to export!';
+                statusText = '<strong>Step 4:</strong> Export complete. Download your split files below!';
                 break;
         }
 
         fill.style.width = width;
-        document.getElementById('status').textContent = statusText;
+        document.getElementById('status').innerHTML = statusText;
 
         fill.classList.remove('flash');
         void fill.offsetWidth;
@@ -83,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (routeLayer) map.removeLayer(routeLayer);
 
         document.getElementById('exportBtn').disabled = true;
-        setStep(1);
+        setStep(0);
 
         const reader = new FileReader();
         reader.onload = () => parseGPX(reader.result);
@@ -107,14 +112,14 @@ document.addEventListener('DOMContentLoaded', () => {
         map.fitBounds(routeLayer.getBounds());
         map.on('click', handleSplitClick);
 
-        setStep(2);
+        setStep(1);
     }
 
     function updateStepBar() {
         if (splitMarkers.length === 0) {
-            setStep(2);
+            setStep(1);
         } else {
-            setStep(3);
+            setStep(2);
         }
     }
 
@@ -197,7 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
         segments.push(routePoints.slice(startIdx));
 
         segments.forEach((pts, i) => {
-            const filename = `${baseName}_part${i + 1}.gpx`;
+            const filename = `Part ${downloadCounter}: ${baseName}_part${downloadCounter}.gpx`;
+            downloadCounter++;
             const blob = generateGPXBlob(pts);
             const url = URL.createObjectURL(blob);
             const sizeKB = (blob.size / 1024).toFixed(1);
@@ -217,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hasExported = true;
         document.getElementById('exportBtn').disabled = true;
 
-        setStatus('Export complete. Download your split files below!');
+        setStep(3);
     }
 
     function generateGPXBlob(points) {
@@ -248,16 +254,16 @@ document.addEventListener('DOMContentLoaded', () => {
         map.off('click', handleSplitClick);
         map.setView([0, 0], 2);
 
-        setStep(1);
+        setStep(0);
     }
 
     if (!hasExported && splitMarkers.length === 0) {
-        setStep(2);
+        setStep(1);
     }
 
     document.getElementById('gpxInput').addEventListener('change', handleFile);
     document.getElementById('exportBtn').addEventListener('click', exportGPX);
     document.getElementById('resetBtn').addEventListener('click', resetApp);
 
-    setStep(1);
+    setStep(0);
 });
