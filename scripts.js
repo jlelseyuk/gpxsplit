@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalFile = document.getElementById('gpxInput').files[0];
         if (!originalFile) return;
 
-        const baseName = originalFile.name.replace(/\.gpx$/i, '');
+        const baseName = originalFile.name.replace(/\.gpx$/i, ''); // use original filename
         const downloadList = document.getElementById('downloadList');
         const downloadSection = document.getElementById('downloadSection');
 
@@ -202,23 +202,22 @@ document.addEventListener('DOMContentLoaded', () => {
         segments.push(routePoints.slice(startIdx));
 
         segments.forEach((pts, i) => {
-            const filename = `${baseName}-Part-${downloadCounter}.gpx`;
-            const blob = generateGPXBlob(pts);
+            const partNumber = downloadCounter;
+            const filename = `${baseName}-Part-${partNumber}.gpx`;
+            const blob = generateGPXBlob(pts, partNumber, baseName);
             const url = URL.createObjectURL(blob);
             const sizeKB = (blob.size / 1024).toFixed(1);
 
             const link = document.createElement('a');
             link.href = url;
             link.download = filename;
-
             link.innerHTML = `
-                <span>Part ${downloadCounter}: ${filename}</span>
-                <span class="filesize">${sizeKB} KB</span>
-            `;
-
-            downloadCounter++;
+            <span>Part ${partNumber}: ${filename}</span>
+            <span class="filesize">${sizeKB} KB</span>
+        `;
 
             downloadList.appendChild(link);
+            downloadCounter++;
         });
 
         hasExported = true;
@@ -227,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setStep(3);
     }
 
-    function generateGPXBlob(points, partNumber = 1, baseName = "Route") {
+    function generateGPXBlob(points, partNumber = 1, baseName) {
         const gpx = `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPX Route Splitter" xmlns="http://www.topografix.com/GPX/1/1"><metadata><name>${baseName} - Part ${partNumber}</name></metadata><trk><name>${baseName} - Part ${partNumber}</name><trkseg>${points.map(p => `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('\n')}</trkseg></trk></gpx>`;
         return new Blob([gpx], {type: 'application/gpx+xml'});
     }
