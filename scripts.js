@@ -38,6 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
+    function setStatus(text) {
+        document.getElementById('status').textContent = text;
+    }
+
     function setStep(stage) {
         const fill = document.getElementById('stepFill');
         let width = '0%';
@@ -114,6 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    if (splitMarkers.length > 0) {
+        setStatus('Step 3: Split point(s) added. Ready to export!');
+    }
+
     function handleSplitClick(e) {
         if (splitMarkers.length >= 3) return;
 
@@ -128,15 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         marker.on('click', () => {
             map.removeLayer(marker);
-
             splitMarkers = splitMarkers.filter(m => m !== marker);
 
             hasExported = false;
+            document.getElementById('downloadSection').style.display = 'none';
 
             updateStepBar();
 
             document.getElementById('exportBtn').disabled = splitMarkers.length === 0;
-            document.getElementById('downloadSection').style.display = 'none';
         });
 
         splitMarkers.push(marker);
@@ -209,6 +216,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         hasExported = true;
         document.getElementById('exportBtn').disabled = true;
+
+        setStatus('Export complete. Download your split files below!');
     }
 
     function generateGPXBlob(points) {
@@ -240,6 +249,10 @@ document.addEventListener('DOMContentLoaded', () => {
         map.setView([0, 0], 2);
 
         setStep(1);
+    }
+
+    if (!hasExported && splitMarkers.length === 0) {
+        setStep(2);
     }
 
     document.getElementById('gpxInput').addEventListener('change', handleFile);
