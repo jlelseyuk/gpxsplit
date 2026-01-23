@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalFile = document.getElementById('gpxInput').files[0];
         if (!originalFile) return;
 
-        const baseName = originalFile.name.replace(/\.gpx$/i, ''); // use original filename
+        const baseName = originalFile.name.replace(/\.gpx$/i, '');
         const downloadList = document.getElementById('downloadList');
         const downloadSection = document.getElementById('downloadSection');
 
@@ -212,9 +212,9 @@ document.addEventListener('DOMContentLoaded', () => {
             link.href = url;
             link.download = filename;
             link.innerHTML = `
-            <span>Part ${partNumber}: ${filename}</span>
-            <span class="filesize">${sizeKB} KB</span>
-        `;
+                <span>Part ${partNumber}: ${filename}</span>
+                <span class="filesize">${sizeKB} KB</span>
+            `;
 
             downloadList.appendChild(link);
             downloadCounter++;
