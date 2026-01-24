@@ -100,12 +100,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const xml = parser.parseFromString(text, 'application/xml');
         const trkpts = [...xml.getElementsByTagName('trkpt')];
 
-        routePoints = trkpts.map(pt => [
-            parseFloat(pt.getAttribute('lat')),
-            parseFloat(pt.getAttribute('lon'))
-        ]);
+        routePoints = trkpts.map(pt => {
+            const eleNode = pt.getElementsByTagName('ele')[0];
+            return {
+                lat: parseFloat(pt.getAttribute('lat')),
+                lon: parseFloat(pt.getAttribute('lon')),
+                ele: eleNode ? parseFloat(eleNode.textContent) : null
+            };
+        });
 
-        routeLayer = L.polyline(routePoints, {color: 'blue'}).addTo(map);
+        routeLayer = L.polyline(routePoints.map(p => [p.lat, p.lon]), { color: 'blue' }).addTo(map);
         startMarker = L.marker(routePoints[0], {icon: startIcon}).addTo(map).bindPopup('Start');
         endMarker = L.marker(routePoints[routePoints.length - 1], {icon: endIcon}).addTo(map).bindPopup('End');
 
@@ -227,8 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateGPXBlob(points, partNumber = 1, baseName) {
-        const gpx = `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPX Route Splitter" xmlns="http://www.topografix.com/GPX/1/1"><metadata><name>${baseName} - Part ${partNumber}</name></metadata><trk><name>${baseName} - Part ${partNumber}</name><trkseg>${points.map(p => `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('\n')}</trkseg></trk></gpx>`;
-        return new Blob([gpx], {type: 'application/gpx+xml'});
+        const trkpts = points.map(p => `<trkpt lat="${p.lat}" lon="${p.lon}">${p.ele !== null ? `<ele>${p.ele}</ele>` : ``}</trkpt>`).join('');
+        const gpx = `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPX Route Splitter" xmlns="http://www.topografix.com/GPX/1/1"><metadata><name>${baseName} - Part ${partNumber}</name></metadata><trk><name>${baseName} - Part ${partNumber}</name><trkseg>${trkpts}</trkseg></trk></gpx>`;
+        return new Blob([gpx], { type: 'application/gpx+xml' });
     }
 
     function resetApp() {
