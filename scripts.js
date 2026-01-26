@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 1:
                 width = '40%';
-                statusText = '<strong>Step 2:</strong> GPX uploaded. Click on the map to add up to 3 split points.';
+                statusText = '<strong>Step 2:</strong> GPX uploaded. Click on the map to add up to 10 split points.';
                 break;
             case 2:
                 width = '70%';
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleSplitClick(e) {
-        if (splitMarkers.length >= 3) return;
+        if (splitMarkers.length >= 10) return;
 
         const nearestIndex = findNearestPointIndex(e.latlng);
         const nearestPoint = routePoints[nearestIndex];
