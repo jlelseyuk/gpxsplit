@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let splitMarkers = [];
 
     let hasExported = false;
-    let downloadCounter = 1;
 
     const startIcon = new L.Icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -206,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         segments.push(routePoints.slice(startIdx));
 
         segments.forEach((pts, i) => {
-            const partNumber = downloadCounter;
+            const partNumber = i + 1;
             const filename = `${baseName}-Part-${partNumber}.gpx`;
             const blob = generateGPXBlob(pts, partNumber, baseName);
             const url = URL.createObjectURL(blob);
@@ -215,13 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const link = document.createElement('a');
             link.href = url;
             link.download = filename;
-            link.innerHTML = `
-                <span>Part ${partNumber}: ${filename}</span>
-                <span class="filesize">${sizeKB} KB</span>
-            `;
+            link.innerHTML = `<span>Part ${partNumber}: ${filename}</span><span class="filesize">${sizeKB} KB</span>`;
 
             downloadList.appendChild(link);
-            downloadCounter++;
         });
 
         hasExported = true;
