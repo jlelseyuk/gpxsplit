@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let splitMarkers = [];
     let waypoints = [];
     let hasExported = false;
+    let waypointMarkers = [];
 
     // Custom Leaflet icons for start, end and split points
     const startIcon = new L.Icon({
@@ -35,6 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
+    });
+    const waypointIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [18, 30],
+        iconAnchor: [9, 30],
+        popupAnchor: [1, -24],
+        shadowSize: [30, 30]
     });
 
     // Add OpenStreetMap tiles to the map
@@ -94,6 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (startMarker) map.removeLayer(startMarker);
         if (endMarker) map.removeLayer(endMarker);
         if (routeLayer) map.removeLayer(routeLayer);
+        waypointMarkers.forEach(m => map.removeLayer(m));
+        waypointMarkers = [];
 
         document.getElementById('exportBtn').disabled = true;
         setStep(0);
@@ -124,15 +135,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Extract waypoints from <wpt> elements
         waypoints = wpts.map(wpt => {
-            const eleNode = wpt.getElementsByTagName('ele')[0];
             const nameNode = wpt.getElementsByTagName('name')[0];
             const typeNode = wpt.getElementsByTagName('type')[0];
             const symNode  = wpt.getElementsByTagName('sym')[0];
 
+            const lat = parseFloat(wpt.getAttribute('lat'));
+            const lon = parseFloat(wpt.getAttribute('lon'));
+
             return {
-                lat: parseFloat(wpt.getAttribute('lat')),
-                lon: parseFloat(wpt.getAttribute('lon')),
-                ele: eleNode ? parseFloat(eleNode.textContent) : null,
+                lat,
+                lon,
+                ele: getNearestTrackElevation(lat, lon), // 👈 grab from track
                 name: nameNode ? nameNode.textContent : 'Point',
                 type: typeNode ? typeNode.textContent : 'Generic',
                 sym: symNode ? symNode.textContent : 'Waypoint'
@@ -150,6 +163,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add start and end markers
         startMarker = L.marker(routePoints[0], {icon: startIcon}).addTo(map).bindPopup('Start');
         endMarker = L.marker(routePoints[routePoints.length - 1], {icon: endIcon}).addTo(map).bindPopup('End');
+
+        waypoints.forEach(wpt => {
+            const marker = L.marker([wpt.lat, wpt.lon], {
+                icon: waypointIcon,
+                interactive: true
+            }).addTo(map).bindPopup(`<strong>${wpt.name}</strong><br>Type: ${wpt.type}<br>${wpt.ele !== null ? `Elevation: ${wpt.ele} m` : ''}`);
+
+            waypointMarkers.push(marker);
+        });
 
         map.fitBounds(routeLayer.getBounds());
 
@@ -223,6 +245,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return idx;
     }
 
+    // Find nearest track elevation
+    function getNearestTrackElevation(lat, lon) {
+        let minDist = Infinity;
+        let ele = null;
+
+        routePoints.forEach(pt => {
+            if (pt.ele === null) return;
+
+            const d = map.distance(
+                L.latLng(lat, lon),
+                L.latLng(pt.lat, pt.lon)
+            );
+
+            if (d < minDist) {
+                minDist = d;
+                ele = pt.ele;
+            }
+        });
+
+        return ele;
+    }
+
     // Export the split GPX segments
     function exportGPX(e) {
         e.preventDefault();
@@ -294,12 +338,14 @@ document.addEventListener('DOMContentLoaded', () => {
         splitMarkers.forEach(m => map.removeLayer(m));
         if (startMarker) map.removeLayer(startMarker);
         if (endMarker) map.removeLayer(endMarker);
+        waypointMarkers.forEach(m => map.removeLayer(m));
 
         splitMarkers = [];
         routePoints = [];
         routeLayer = null;
         startMarker = null;
         endMarker = null;
+        waypointMarkers = [];
 
         document.getElementById('gpxInput').value = '';
         document.querySelector('.file-upload-text').textContent = 'No file chosen...';
