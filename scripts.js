@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         routePoints = trkpts.map(pt => {
             const eleNode = pt.getElementsByTagName('ele')[0];
+
             return {
                 lat: parseFloat(pt.getAttribute('lat')),
                 lon: parseFloat(pt.getAttribute('lon')),
@@ -113,12 +114,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const eleNode = wpt.getElementsByTagName('ele')[0];
             const nameNode = wpt.getElementsByTagName('name')[0];
             const typeNode = wpt.getElementsByTagName('type')[0];
+            const symNode  = wpt.getElementsByTagName('sym')[0];
+
             return {
                 lat: parseFloat(wpt.getAttribute('lat')),
                 lon: parseFloat(wpt.getAttribute('lon')),
                 ele: eleNode ? parseFloat(eleNode.textContent) : null,
-                name: nameNode ? nameNode.textContent : '',
-                type: typeNode ? typeNode.textContent : ''
+                name: nameNode ? nameNode.textContent : 'Point',
+                type: typeNode ? typeNode.textContent : 'Generic',
+                sym: symNode ? symNode.textContent : 'Waypoint'
             };
         });
 
@@ -237,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function generateGPXBlob(points, partNumber = 1, baseName) {
         const trkpts = points.map(p => `<trkpt lat="${p.lat}" lon="${p.lon}">${p.ele !== null ? `<ele>${p.ele}</ele>` : ``}</trkpt>`).join('');
-        const wptStr = waypoints.map(wpt => `<wpt lat="${wpt.lat}" lon="${wpt.lon}">${wpt.ele !== null ? `<ele>${wpt.ele}</ele>` : ``}<name>${wpt.name}</name><type>${wpt.type}</type></wpt>`).join('');
+        const wptStr = waypoints.map(wpt => `<wpt lat="${wpt.lat}" lon="${wpt.lon}">${wpt.ele !== null ? `<ele>${wpt.ele}</ele>` : ``}${wpt.name ? `<name>${wpt.name}</name>` : ``}${wpt.type ? `<type>${wpt.type}</type>` : ``}${wpt.sym ? `<sym>${wpt.sym}</sym>` : ``}</wpt>`).join('');
         const gpx = `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPX Route Splitter" xmlns="http://www.topografix.com/GPX/1/1"><metadata><name>${baseName} - Part ${partNumber}</name></metadata>${wptStr}<trk><name>${baseName} - Part ${partNumber}</name><trkseg>${trkpts}</trkseg></trk></gpx>`;
         return new Blob([gpx], { type: 'application/gpx+xml' });
     }
