@@ -142,7 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Draw the GPX track as a blue polyline
         routeLayer = L.polyline(routePoints.map(p => [p.lat, p.lon]), {
             color: '#0975dc',
-            weight: 4
+            weight: 5,
+            opacity: 1,
+            interactive: false
         }).addTo(map);
 
         // Add start and end markers
