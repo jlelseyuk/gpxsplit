@@ -315,6 +315,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         hasExported = true;
         document.getElementById('exportBtn').disabled = true;
+        document.getElementById('gpxInput').disabled = true;
+        document.querySelector('.file-upload').style.pointerEvents = 'none';
 
         setStep(3);
     }
@@ -349,9 +351,11 @@ document.addEventListener('DOMContentLoaded', () => {
         waypointMarkers = [];
 
         document.getElementById('gpxInput').value = '';
+        document.getElementById('gpxInput').disabled = false;
         document.querySelector('.file-upload-text').textContent = 'No file chosen...';
         document.getElementById('exportBtn').disabled = true;
         document.getElementById('downloadSection').style.display = 'none';
+        document.querySelector('.file-upload').style.pointerEvents = 'auto';
 
         hasExported = false;
 

@@ -26,8 +26,14 @@ header .title:hover {
     opacity: .6;
 }
 header .title h1 {
-    font-size: 28px;
+    font-size: 26px;
     margin: 0;
+}
+header .title h1 sup {
+    font-size: 10px;
+    padding: .125rem .3rem;
+    background-color: #0975dc;
+    color: #111827;
 }
 header .title img {
     width: 60px;
@@ -99,11 +105,18 @@ header .small {
     border-radius: 6px;
     font-size: 14px;
     font-weight: 600;
+    text-align: center;
     white-space: nowrap;
     transition: background-color 0.2s ease, transform 0.1s ease;
 }
 .controls .upload-form .file-upload:hover .file-upload-button {
     background-color: #075fb3;
+}
+.controls .upload-form .file-upload .gpx-input-field:disabled + .file-upload-button {
+    background-color: #a8a8a8;
+}
+.controls .upload-form .file-upload .gpx-input-field:disabled + .file-upload-button + .file-upload-text {
+    color: #a8a8a8;
 }
 .controls .upload-form .file-upload .file-upload-text {
     margin-left: 12px;
@@ -121,6 +134,7 @@ header .small {
     padding: 12px 18px;
     font-size: 15px;
     font-weight: 600;
+    text-align: center;
     cursor: pointer;
     transition: all 300ms ease-in-out;
 }
@@ -141,15 +155,21 @@ header .small {
     margin-bottom: 12px;
 }
 .controls .download .reset-link {
-    color: #881515;
-    font-size: 14px;
+    background-color: #881515;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 15px;
     font-weight: 600;
-    margin-bottom: 10px;
+    cursor: pointer;
+    display: block;
+    text-align: center;
+    margin: 10px 0;
     transition: all 300ms ease-in-out;
 }
-.controls .reset-link:hover {
-    color: #555555;
-    cursor: pointer;
+.controls .download .reset-link:hover {
+    background-color: #6c1212;
 }
 .controls .download h2 {
     font-size: 18px;
@@ -210,8 +230,5 @@ footer .subtitle a:hover {
         display: flex;
         gap: 8px;
         flex-direction: column;
-    }
-    .controls .reset-link {
-        width: 100%;
     }
 }
