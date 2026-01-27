@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setStep(0);
     }
 
-    // Initialize event listeners
+    // Init event listeners
     if (!hasExported && splitMarkers.length === 0) {
         setStep(1);
     }
