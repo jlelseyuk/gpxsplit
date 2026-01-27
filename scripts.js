@@ -149,11 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const nearestIndex = findNearestPointIndex(e.latlng);
         const nearestPoint = routePoints[nearestIndex];
-
-        const marker = L.marker(nearestPoint, {icon: splitIcon, draggable: false})
-            .addTo(map)
-            .bindPopup(`Split ${splitMarkers.length + 1}`)
-            .openPopup();
+        const marker = L.marker(nearestPoint, {icon: splitIcon, draggable: false}).addTo(map).bindPopup(`Split ${splitMarkers.length + 1}`).openPopup();
         marker._routeIndex = nearestIndex;
 
         marker.on('click', () => {
