@@ -141,11 +141,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const lat = parseFloat(wpt.getAttribute('lat'));
             const lon = parseFloat(wpt.getAttribute('lon'));
+            const ele = getNearestTrackElevation(lat, lon);
 
             return {
                 lat,
                 lon,
-                ele: getNearestTrackElevation(lat, lon), // 👈 grab from track
+                ele: ele !== null ? Math.round(ele) : null,
                 name: nameNode ? nameNode.textContent : 'Point',
                 type: typeNode ? typeNode.textContent : 'Generic',
                 sym: symNode ? symNode.textContent : 'Waypoint'
