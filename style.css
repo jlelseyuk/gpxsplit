@@ -5,6 +5,7 @@ body {
     font-style: normal;
     font-size: 16px;
     margin: 0;
+    color: #111827;
 }
 header {
     padding: 10px;
@@ -29,11 +30,12 @@ header .title h1 {
     font-size: 26px;
     margin: 0;
 }
-header .title h1 sup {
+header .title h1 sup.beta {
     font-size: 10px;
     padding: .125rem .3rem;
     background-color: #0975dc;
-    color: #111827;
+    color: #ffffff;
+    border-radius: 2px;
 }
 header .title img {
     width: 60px;
@@ -45,10 +47,28 @@ header .small {
     margin-bottom: 10px;
     line-height: 1.4;
 }
-.controls {
+.container {
     padding: 10px;
 }
-.controls .step-bar {
+.container .back-button {
+    background-color: #0975dc;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    margin: 8px 0;
+    text-decoration: none;
+    transition: all 300ms ease-in-out;
+}
+.container .back-button:hover {
+    background-color: #075fb3;
+}
+.container .step-bar {
     position: relative;
     height: 10px;
     background-color: #ddd;
@@ -56,7 +76,7 @@ header .small {
     overflow: hidden;
     margin: 8px 0;
 }
-.controls .step-bar .step-fill {
+.container .step-bar .step-fill {
     height: 100%;
     width: 0%;
     background-color: #0975dc;
@@ -68,24 +88,24 @@ header .small {
     50% { background-color: #33a1ff; }
     100% { background-color: #0975dc; }
 }
-.controls .step-bar .step-fill.flash {
+.container .step-bar .step-fill.flash {
     animation: flash 0.5s ease-in-out;
 }
-.controls #status {
+.container #status {
     display: block;
     color: #0975dc;
     margin-bottom: 10px;
 }
-.controls .upload-form {
+.container .upload-form {
     display: flex;
     flex-direction: row;
     gap: 16px;
     font-family: "Figtree", "Arial", "Helvetica", sans-serif;
 }
-.controls .upload-form .file-upload input[type="file"] {
+.container .upload-form .file-upload input {
     display: none;
 }
-.controls .upload-form .file-upload {
+.container .upload-form .file-upload {
     display: flex;
     align-items: center;
     border: 2px dotted #a0bed9;
@@ -95,10 +115,10 @@ header .small {
     flex-grow: 1;
     transition: all 300ms ease-in-out;
 }
-.controls .upload-form .file-upload:hover {
+.container .upload-form .file-upload:hover {
     border-color: #0975dc;
 }
-.controls .upload-form .file-upload-button {
+.container .upload-form .file-upload-button {
     background-color: #0975dc;
     color: #ffffff;
     padding: 10px 16px;
@@ -109,16 +129,16 @@ header .small {
     white-space: nowrap;
     transition: background-color 0.2s ease, transform 0.1s ease;
 }
-.controls .upload-form .file-upload:hover .file-upload-button {
+.container .upload-form .file-upload:hover .file-upload-button {
     background-color: #075fb3;
 }
-.controls .upload-form .file-upload .gpx-input-field:disabled + .file-upload-button {
+.container .upload-form .file-upload .gpx-input-field:disabled + .file-upload-button {
     background-color: #a8a8a8;
 }
-.controls .upload-form .file-upload .gpx-input-field:disabled + .file-upload-button + .file-upload-text {
+.container .upload-form .file-upload .gpx-input-field:disabled + .file-upload-button + .file-upload-text {
     color: #a8a8a8;
 }
-.controls .upload-form .file-upload .file-upload-text {
+.container .upload-form .file-upload .file-upload-text {
     margin-left: 12px;
     font-size: 14px;
     color: #555;
@@ -126,7 +146,7 @@ header .small {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.controls .upload-form .submit-button {
+.container .upload-form .submit-button {
     background-color: #0975dc;
     color: #ffffff;
     border: none;
@@ -138,23 +158,23 @@ header .small {
     cursor: pointer;
     transition: all 300ms ease-in-out;
 }
-.controls .upload-form .submit-button:hover {
+.container .upload-form .submit-button:hover {
     background-color: #075fb3;
 }
-.controls .upload-form .submit-button:disabled {
+.container .upload-form .submit-button:disabled {
     background-color: #a8a8a8;
 }
-.controls .upload-form .submit-button:disabled:hover {
+.container .upload-form .submit-button:disabled:hover {
     cursor: default;
     background-color: #a8a8a8;
 }
-.controls .download {
+.container .download {
     margin: 8px 0;
 }
-.controls .download .download-list {
+.container .download .download-list {
     margin-bottom: 12px;
 }
-.controls .download .reset-link {
+.container .download .reset-button {
     background-color: #881515;
     color: #ffffff;
     border: none;
@@ -168,14 +188,14 @@ header .small {
     margin: 10px 0;
     transition: all 300ms ease-in-out;
 }
-.controls .download .reset-link:hover {
+.container .download .reset-button:hover {
     background-color: #6c1212;
 }
-.controls .download h2 {
+.container .download h2 {
     font-size: 18px;
     color: #0975dc;
 }
-.controls .download #downloadList a {
+.container .download #downloadList a {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -190,10 +210,10 @@ header .small {
     text-decoration: none;
     transition: all 300ms ease-in-out;
 }
-.controls .download #downloadList a:hover {
+.container .download #downloadList a:hover {
     background-color: #e5e7eb;
 }
-.controls .download #downloadList .filesize {
+.container .download #downloadList .filesize {
     color: #6b7280;
     font-size: 13px;
     min-width: 50px;
@@ -226,7 +246,10 @@ footer .subtitle a:hover {
     opacity: .6;
 }
 @media (max-width: 767px) {
-    .controls .upload-form {
+    .container .back-button {
+        display: block;
+    }
+    .container .upload-form {
         display: flex;
         gap: 8px;
         flex-direction: column;
