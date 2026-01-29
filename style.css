@@ -218,14 +218,12 @@ header .small {
     font-size: 13px;
     min-width: 50px;
 }
-.map-wrapper {
-    padding: 10px;
-}
-.map-wrapper #map {
+#map {
     height: calc(100vh - 410px);
     border-radius: 6px;
+    margin-top: 10px;
 }
-.map-wrapper #map .leaflet-popup-content {
+#map .leaflet-popup-content {
     text-align: center;
 }
 footer {

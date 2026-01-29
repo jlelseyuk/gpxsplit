@@ -33,9 +33,7 @@ include 'header.php';
         </div>
     </div>
 
-    <div class="map-wrapper">
-        <div id="map" class="map"></div>
-    </div>
+    <div id="map"></div>
 </main>
 
 <?php
