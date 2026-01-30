@@ -250,6 +250,9 @@ header .small {
     border-radius: 4px;
     z-index: 1000;
 }
+#map .unit-toggle:hover {
+    background: #f4f4f4;
+}
 footer {
     color: #ffffff;
     background-color: #111827;
