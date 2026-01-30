@@ -35,7 +35,7 @@ include 'header.php';
 
     <div id="map">
         <button id="unitToggle" class="unit-toggle">
-            Show km
+            Units: mi
         </button>
     </div>
 </main>

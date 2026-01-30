@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add your toggle logic
     unitBtn.addEventListener('click', () => {
         useMiles = !useMiles;
-        unitBtn.textContent = useMiles ? 'Show km' : 'Show miles';
+        unitBtn.textContent = useMiles ? 'Units: mi' : 'Units: km';
         if (routePoints.length > 0) {
             addDistanceMarkers(routePoints, map, 5000, useMiles);
         }
