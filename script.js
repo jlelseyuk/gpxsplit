@@ -325,6 +325,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return ele;
     }
 
+    // Calculates split file distances
+    function calculateSegmentDistance(points) {
+        let distance = 0;
+
+        for (let i = 1; i < points.length; i++) {
+            const p1 = L.latLng(points[i - 1].lat, points[i - 1].lon);
+            const p2 = L.latLng(points[i].lat, points[i].lon);
+            distance += p1.distanceTo(p2);
+        }
+
+        return distance;
+    }
+
     // Export the split GPX segments
     function exportGPX(e) {
         e.preventDefault();
@@ -357,15 +370,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // Generate GPX files for each segment
         segments.forEach((pts, i) => {
             const partNumber = i + 1;
-            const filename = `${baseName}-Part-${partNumber}.gpx`;
+            const safeBaseName = baseName.replace(/_/g, '-');
+            const filename = `${safeBaseName}-Part-${partNumber}.gpx`;
             const blob = generateGPXBlob(pts, partNumber, baseName);
             const url = URL.createObjectURL(blob);
-            const sizeKB = (blob.size / 1024).toFixed(1);
+            const sizeKB = Math.round(blob.size / 1024);
+
+            // Calculate distance
+            const meters = calculateSegmentDistance(pts);
+            const distanceStr = useMiles ? (meters / 1609.344).toFixed(1) + ' mi' : (meters / 1000).toFixed(1) + ' km';
 
             const link = document.createElement('a');
             link.href = url;
             link.download = filename;
-            link.innerHTML = `<span>Part ${partNumber}: ${filename}</span><span class="filesize">${sizeKB} KB</span>`;
+
+            // Add distance next to filesize
+            const downloadIcon = '<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24" ><path d="M11 8v7H7l5 6 5-6h-4V8z"></path><path d="M19 3H5c-1.1 0-2 .9-2 2v7h2V5h14v7h2V5c0-1.1-.9-2-2-2"></path></svg>';
+            link.innerHTML = `${downloadIcon}<span class="part-name"><strong>Part ${partNumber}:</strong> ${filename}</span><span class="distance"><strong>${distanceStr}</strong></span><span class="filesize">(${sizeKB} KB)</span>`;
 
             downloadList.appendChild(link);
         });
@@ -374,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('exportBtn').disabled = true;
         document.getElementById('gpxInput').disabled = true;
         document.querySelector('.file-upload').style.pointerEvents = 'none';
+        document.querySelector('.file-upload').style.borderColor = '#a8a8a8';
 
         setStep(3);
     }

@@ -42,8 +42,8 @@ header .title img {
     height: 60px;
     border-radius: 6px;
 }
-header .small {
-    font-size: 14px;
+header .intro {
+    font-size: 16px;
     margin-bottom: 10px;
     line-height: 1.4;
 }
@@ -169,10 +169,7 @@ header .small {
     background-color: #a8a8a8;
 }
 .container .download {
-    margin: 8px 0;
-}
-.container .download .download-list {
-    margin-bottom: 12px;
+    margin-top: 10px;
 }
 .container .download .reset-button {
     background-color: #881515;
@@ -185,7 +182,7 @@ header .small {
     cursor: pointer;
     display: block;
     text-align: center;
-    margin: 10px 0;
+    margin-top: 10px;
     transition: all 300ms ease-in-out;
 }
 .container .download .reset-button:hover {
@@ -195,28 +192,41 @@ header .small {
     font-size: 18px;
     color: #0975dc;
 }
-.container .download #downloadList a {
+.container .download .download-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.container .download .download-list a {
     display: flex;
     justify-content: space-between;
+    gap: 0.75rem;
     align-items: center;
     background: #f3f4f6;
     border: 1px solid #d1d5db;
     border-radius: 8px;
     padding: 10px 12px;
-    margin-bottom: 8px;
     font-size: 14px;
     font-weight: 500;
     color: #0975dc;
     text-decoration: none;
     transition: all 300ms ease-in-out;
 }
-.container .download #downloadList a:hover {
+.container .download .download-list a:hover {
     background-color: #e5e7eb;
 }
-.container .download #downloadList .filesize {
+.container .download .download-list .part-name {
+    flex: 1;
+}
+.container .download .download-list .filesize {
     color: #6b7280;
-    font-size: 13px;
-    min-width: 50px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.container .download .download-list .distance {
+    color: #111827;
+    font-size: 14px;
+    white-space: nowrap;
 }
 #map {
     position: relative;
@@ -235,7 +245,7 @@ header .small {
     border-radius: 3px;
     padding: 0 4px;
     font-size: 12px;
-    color: #000000;
+    color: #111827;
     white-space: nowrap;
     pointer-events: none;
 }
@@ -249,6 +259,7 @@ header .small {
     font-weight: 600;
     border: none;
     box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
+    color: #111827;
     background: #ffffff;
     cursor: pointer;
     border-radius: 4px;
