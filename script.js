@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Init Leaflet map centered with zoom level
-    const map = L.map('map').setView([0, 0], 2);
+    const map = L.map('map', {
+        center: [54.5, -3],
+        zoom: 4
+    });
 
     // Map layers and data storage
     let routeLayer;
