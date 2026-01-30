@@ -436,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('exportBtn').disabled = true;
         document.getElementById('downloadSection').style.display = 'none';
         document.querySelector('.file-upload').style.pointerEvents = 'auto';
+        document.querySelector('.file-upload').style.borderColor = '#6baade';
 
         hasExported = false;
 
