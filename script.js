@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let waypoints = [];
     let hasExported = false;
     let waypointMarkers = [];
+    let distanceMarkers = [];
+
+    let useMiles = true;
 
     // Custom Leaflet icons for start, end and split points
     const startIcon = new L.Icon({
@@ -55,6 +58,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function setStatus(text) {
         document.getElementById('status').textContent = text;
     }
+
+    // Prevent clicks from reaching the map (no accidental split points)
+    const unitBtn = document.getElementById('unitToggle');
+    L.DomEvent.on(unitBtn, 'click', L.DomEvent.stopPropagation);
+
+    // Add your toggle logic
+    unitBtn.addEventListener('click', () => {
+        useMiles = !useMiles;
+        unitBtn.textContent = useMiles ? 'Show km' : 'Show miles';
+        if (routePoints.length > 0) {
+            addDistanceMarkers(routePoints, map, 5000, useMiles);
+        }
+    });
 
     // Update the progress step bar
     function setStep(stage) {
@@ -179,6 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Enable user to click on the map to add split points
         map.on('click', handleSplitClick);
 
+        // Add distance markers every 5 km (change if needed)
+        addDistanceMarkers(routePoints, map, 5000, useMiles);
+
         setStep(1);
     }
 
@@ -230,6 +249,41 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('downloadSection').style.display = 'none';
 
         updateStepBar();
+    }
+
+    // Adding distance markers to the map polyline
+    function addDistanceMarkers(routePoints, map, stepMeters = 5000, useMiles = true) {
+        distanceMarkers.forEach(m => map.removeLayer(m));
+        distanceMarkers = [];
+
+        let accumulatedDistance = 0;
+        let totalDistance = 0;
+
+        for (let i = 1; i < routePoints.length; i++) {
+            const p1 = L.latLng(routePoints[i - 1].lat, routePoints[i - 1].lon);
+            const p2 = L.latLng(routePoints[i].lat, routePoints[i].lon);
+
+            const segmentDistance = p1.distanceTo(p2);
+            accumulatedDistance += segmentDistance;
+            totalDistance += segmentDistance;
+
+            if (accumulatedDistance >= stepMeters) {
+                const displayDistance = useMiles ? Math.round((totalDistance / 1000) * 0.621371) : Math.round(totalDistance / 1000);
+
+                const marker = L.marker([p2.lat, p2.lng], {
+                    interactive: false,
+                    icon: L.divIcon({
+                        className: 'distance-marker',
+                        html: displayDistance,
+                        iconSize: [null, 18],
+                        iconAnchor: [15, 9]
+                    })
+                }).addTo(map);
+
+                distanceMarkers.push(marker);
+                accumulatedDistance = 0;
+            }
+        }
     }
 
     // Find the index of the nearest route point to a clicked lat/lng
@@ -361,6 +415,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         map.off('click', handleSplitClick);
         map.setView([0, 0], 2);
+
+        distanceMarkers.forEach(m => map.removeLayer(m));
+        distanceMarkers = [];
 
         setStep(0);
     }

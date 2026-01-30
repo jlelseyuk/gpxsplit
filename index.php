@@ -33,7 +33,11 @@ include 'header.php';
         </div>
     </div>
 
-    <div id="map"></div>
+    <div id="map">
+        <button id="unitToggle" class="unit-toggle">
+            Show km
+        </button>
+    </div>
 </main>
 
 <?php
