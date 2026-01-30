@@ -177,7 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
             color: '#0975dc',
             weight: 5,
             opacity: 1,
-            interactive: false
+            interactive: true,
+            className: 'route-polyline'
         }).addTo(map);
 
         // Add start and end markers

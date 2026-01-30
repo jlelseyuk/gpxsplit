@@ -236,6 +236,9 @@ header .intro {
 #map a {
     transition: all 300ms ease-in-out;
 }
+#map .clickable-polyline {
+    cursor: pointer;
+}
 #map .leaflet-popup-content {
     text-align: center;
 }
