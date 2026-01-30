@@ -1,5 +1,2 @@
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/script.js?v=<?= filemtime('script.js') ?>"></script>
-
 </body>
 </html>

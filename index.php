@@ -23,7 +23,7 @@ include 'header.php';
         </form>
 
         <div id="downloadSection" class="download" style="display: none;">
-            <h2>Download parts:</h2>
+            <h2>Download split files:</h2>
 
             <div id="downloadList" class="download-list"></div>
 
@@ -40,7 +40,10 @@ include 'header.php';
     </div>
 </main>
 
-<?php
-include 'footer.php';
-include 'base.php';
-?>
+<?php include 'footer.php'; ?>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="/script.js?v=<?= filemtime('script.js') ?>"></script>
+
+<?php include 'base.php'; ?>
