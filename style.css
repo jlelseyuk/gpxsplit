@@ -221,7 +221,6 @@ header .small {
 #map {
     position: relative;
     height: calc(100vh - 410px);
-    border-radius: 6px;
     margin-top: 10px;
 }
 #map a {
@@ -248,7 +247,8 @@ header .small {
     padding: 6px 12px;
     font-size: 12px;
     font-weight: 600;
-    border: 2px solid rgba(0,0,0,.2);
+    border: none;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
     background: #ffffff;
     cursor: pointer;
     border-radius: 4px;
