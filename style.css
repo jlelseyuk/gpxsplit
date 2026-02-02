@@ -233,6 +233,9 @@ header .intro {
     height: calc(100vh - 410px);
     margin-top: 10px;
 }
+#map:focus {
+    outline: none;
+}
 #map a {
     transition: all 300ms ease-in-out;
 }
