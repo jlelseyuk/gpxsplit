@@ -31,13 +31,6 @@ header .title h1 {
     font-size: 26px;
     margin: 0;
 }
-header .title h1 sup.beta {
-    font-size: 10px;
-    padding: .125rem .3rem;
-    background-color: #0975dc;
-    color: #ffffff;
-    border-radius: 2px;
-}
 header .title img {
     width: 60px;
     height: 60px;
