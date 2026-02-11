@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let hasExported = false;
     let waypointMarkers = [];
     let distanceMarkers = [];
-
     let useMiles = true;
 
     // Custom Leaflet icons for start, end and split points
@@ -71,8 +70,14 @@ document.addEventListener('DOMContentLoaded', () => {
     unitBtn.addEventListener('click', () => {
         useMiles = !useMiles;
         unitBtn.textContent = useMiles ? 'Units: mi' : 'Units: km';
+
         if (routePoints.length > 0) {
             addDistanceMarkers(routePoints, map, 5000, useMiles);
+
+            waypointMarkers.forEach((marker, i) => {
+                const wpt = waypoints[i];
+                marker.getPopup().setContent(getWaypointPopupContent(wpt));
+            });
         }
     });
 
@@ -158,9 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const nameNode = wpt.getElementsByTagName('name')[0];
             const typeNode = wpt.getElementsByTagName('type')[0];
             const symNode  = wpt.getElementsByTagName('sym')[0];
-
             const lat = parseFloat(wpt.getAttribute('lat'));
             const lon = parseFloat(wpt.getAttribute('lon'));
+            const distance = getDistanceAlongTrack(lat, lon);
             const ele = getNearestTrackElevation(lat, lon);
 
             return {
@@ -169,7 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ele: ele !== null ? Math.round(ele) : null,
                 name: nameNode ? nameNode.textContent : 'Point',
                 type: typeNode ? typeNode.textContent : 'Generic',
-                sym: symNode ? symNode.textContent : 'Waypoint'
+                sym: symNode ? symNode.textContent : 'Waypoint',
+                distance: distance
             };
         });
 
@@ -190,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const marker = L.marker([wpt.lat, wpt.lon], {
                 icon: waypointIcon,
                 interactive: true
-            }).addTo(map).bindPopup(`<strong>${wpt.name}</strong><br>Type: ${wpt.type}<br>${wpt.ele !== null ? `Elevation: ${wpt.ele} m` : ''}`);
+            }).addTo(map).bindPopup(getWaypointPopupContent(wpt));
 
             waypointMarkers.push(marker);
         });
@@ -291,6 +297,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Content for the waypoint popup
+    function getWaypointPopupContent(wpt) {
+        const eleStr = wpt.ele !== null ? useMiles ? `Elevation: ${(wpt.ele * 3.28084).toFixed(0)} ft<br>` : `Elevation: ${wpt.ele} m<br>` : '';
+        const distStr = useMiles ? (wpt.distance / 1609.344).toFixed(2) + ' mi' : (wpt.distance / 1000).toFixed(2) + ' km';
+        return `<strong>${wpt.name}</strong><br>Type: ${wpt.type}<br>Distance: ${distStr}<br>${eleStr}`;
+    }
+
     // Find the index of the nearest route point to a clicked lat/lng
     function findNearestPointIndex(latlng) {
         let minDist = Infinity;
@@ -303,6 +316,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         return idx;
+    }
+
+    // Calculate distance along route to nearest track point
+    function getDistanceAlongTrack(lat, lon) {
+        let nearestIndex = findNearestPointIndex(L.latLng(lat, lon));
+        let distance = 0;
+
+        for (let i = 1; i <= nearestIndex; i++) {
+            const p1 = L.latLng(routePoints[i - 1].lat, routePoints[i - 1].lon);
+            const p2 = L.latLng(routePoints[i].lat, routePoints[i].lon);
+            distance += p1.distanceTo(p2);
+        }
+
+        return distance;
     }
 
     // Find nearest track elevation
