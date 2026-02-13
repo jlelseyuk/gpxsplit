@@ -6,7 +6,7 @@ include 'header.php';
 <main>
     <div class="container">
         <a href="/" class="back-button">Back to home</a>
-        <h1>Privacy Notice</h1>
+        <h1>Privacy Policy</h1>
         <p><strong>GPX Route Splitter processes your GPX files entirely within your web browser.</strong></p>
         <ul>
             <li>
