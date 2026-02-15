@@ -587,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
         waypointsVisible = true;
 
         map.off('click', handleSplitClick);
-        map.setView([0, 0], 2);
+        map.setView([54.5, -3], 4);
 
         distanceMarkers.forEach(m => map.removeLayer(m));
         distanceMarkers = [];
