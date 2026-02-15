@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let waypoints = [];
     let hasExported = false;
     let waypointMarkers = [];
+    let waypointsVisible = true;
     let distanceMarkers = [];
     let useMiles = true;
 
@@ -52,6 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
         shadowSize: [30, 30]
     });
 
+    // Elements for split list
+    const splitSection = document.getElementById('splitSection');
+    const splitList = document.getElementById('splitList');
+
     // Add OpenStreetMap tiles to the map
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
@@ -62,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('status').textContent = text;
     }
 
-    // Prevent clicks from reaching the map (no accidental split points)
+    // Units button
     const unitBtn = document.getElementById('unitToggle');
     L.DomEvent.on(unitBtn, 'click', L.DomEvent.stopPropagation);
 
@@ -74,11 +79,43 @@ document.addEventListener('DOMContentLoaded', () => {
         if (routePoints.length > 0) {
             addDistanceMarkers(routePoints, map, 5000, useMiles);
 
+            splitMarkers.forEach(marker => {
+                marker.getPopup().setContent(
+                    getSplitPopupContent(
+                        marker._splitNumber,
+                        marker._distance,
+                        marker._ele
+                    )
+                );
+            });
+
+            updateSplitList();
+
             waypointMarkers.forEach((marker, i) => {
                 const wpt = waypoints[i];
                 marker.getPopup().setContent(getWaypointPopupContent(wpt));
             });
         }
+    });
+
+    // Waypoint button
+    const waypointBtn = document.getElementById('waypointToggle');
+    L.DomEvent.on(waypointBtn, 'click', L.DomEvent.stopPropagation);
+
+    waypointBtn.addEventListener('click', () => {
+        waypointsVisible = !waypointsVisible;
+
+        waypointBtn.textContent = waypointsVisible
+            ? 'Waypoints: ON'
+            : 'Waypoints: OFF';
+
+        waypointMarkers.forEach(marker => {
+            if (waypointsVisible) {
+                marker.addTo(map);
+            } else {
+                map.removeLayer(marker);
+            }
+        });
     });
 
     // Update the progress step bar
@@ -130,9 +167,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (routeLayer) map.removeLayer(routeLayer);
         waypointMarkers.forEach(m => map.removeLayer(m));
         waypointMarkers = [];
+        waypointsVisible = true;
+        waypointBtn.style.display = 'none';
 
         document.getElementById('exportBtn').disabled = true;
         setStep(0);
+
+        // Clear the split list UI
+        splitList.innerHTML = '';
+        splitSection.style.display = 'none';
 
         // Read the GPX file as text and parse it
         const reader = new FileReader();
@@ -178,6 +221,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 distance: distance
             };
         });
+
+        // Show or hide waypoint toggle button depending on GPX content
+        if (waypoints.length > 0) {
+            waypointBtn.style.display = 'inline-block';
+            waypointBtn.textContent = 'Waypoints: ON';
+            waypointsVisible = true;
+        } else {
+            waypointBtn.style.display = 'none';
+        }
 
         // Draw the GPX track as a blue polyline
         routeLayer = L.polyline(routePoints.map(p => [p.lat, p.lon]), {
@@ -234,15 +286,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const nearestPoint = routePoints[nearestIndex];
 
         // Add marker at nearest track point
-        const marker = L.marker(nearestPoint, {icon: splitIcon, draggable: false}).addTo(map).bindPopup(`Split ${splitMarkers.length + 1}`).openPopup();
+        const splitNumber = splitMarkers.length + 1;
 
-        // Store index for splitting GPX
+        // Calculate distance + elevation
+        const distance = getDistanceAlongTrack(nearestPoint.lat, nearestPoint.lon);
+        const ele = getNearestTrackElevation(nearestPoint.lat, nearestPoint.lon);
+
+        // Create marker
+        const marker = L.marker(nearestPoint, {
+            icon: splitIcon,
+            draggable: false
+        }).addTo(map).bindPopup(getSplitPopupContent(splitNumber, distance, ele)).openPopup();
+
+        // Store values on marker for later unit updates
         marker._routeIndex = nearestIndex;
+        marker._distance = distance;
+        marker._ele = ele;
+        marker._splitNumber = splitNumber;
 
         // Allow removing split point on marker click
         marker.on('click', () => {
             map.removeLayer(marker);
             splitMarkers = splitMarkers.filter(m => m !== marker);
+
+            updateSplitList();
 
             hasExported = false;
             document.getElementById('downloadSection').style.display = 'none';
@@ -253,6 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         splitMarkers.push(marker);
+
+        updateSplitList();
 
         hasExported = false;
 
@@ -295,6 +364,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 accumulatedDistance = 0;
             }
         }
+    }
+
+    // Split list updated on add, remove or unit toggle of splits
+    function updateSplitList() {
+        splitList.innerHTML = '';
+
+        if (splitMarkers.length === 0) {
+            splitSection.style.display = 'none';
+            return;
+        }
+
+        splitSection.style.display = 'block';
+
+        splitMarkers.forEach((marker, index) => {
+            const distance = marker._distance;
+            const ele = marker._ele;
+            const distStr = useMiles ? (distance / 1609.344).toFixed(2) + ' mi' : (distance / 1000).toFixed(2) + ' km';
+            const eleStr = ele !== null ? useMiles ? (ele * 3.28084).toFixed(0) + ' ft' : ele + ' m' : '-';
+
+            const row = document.createElement('div');
+            row.className = 'split-row';
+            row.innerHTML = `
+                <span style="width: 60px;"><strong>Split ${index + 1}</strong></span>
+                <span style="width: 150px;">Distance: ${distStr}</span>
+                <span style="width: 150px;">Elevation: ${eleStr}</span>
+            `;
+
+            splitList.appendChild(row);
+        });
+    }
+
+    // Content for the split points popups
+    function getSplitPopupContent(splitNumber, distance, ele) {
+        const eleStr = ele !== null ? useMiles ? `Elevation: ${(ele * 3.28084).toFixed(0)} ft<br>` : `Elevation: ${ele} m<br>` : '';
+        const distStr = useMiles ? (distance / 1609.344).toFixed(2) + ' mi' : (distance / 1000).toFixed(2) + ' km';
+        return `<strong>Split ${splitNumber}</strong><br>Distance: ${distStr}<br>${eleStr}`;
     }
 
     // Content for the waypoint popup
@@ -465,8 +570,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('downloadSection').style.display = 'none';
         document.querySelector('.file-upload').style.pointerEvents = 'auto';
         document.querySelector('.file-upload').style.borderColor = '#6baade';
+        waypointBtn.style.display = 'none';
+        splitSection.style.display = 'none';
+        splitList.innerHTML = '';
 
         hasExported = false;
+        waypointsVisible = true;
 
         map.off('click', handleSplitClick);
         map.setView([0, 0], 2);

@@ -22,6 +22,12 @@ include 'header.php';
             </button>
         </form>
 
+        <div id="splitSection" class="splits" style="display: none;">
+            <h2>Splits:</h2>
+
+            <div id="splitList" class="split-list"></div>
+        </div>
+
         <div id="downloadSection" class="download" style="display: none;">
             <h2>Download split files:</h2>
 
@@ -34,9 +40,14 @@ include 'header.php';
     </div>
 
     <div id="map">
-        <button id="unitToggle" class="unit-toggle">
-            Units: mi
-        </button>
+        <div class="custom-controls">
+            <button id="waypointToggle" class="waypoint-toggle" style="display: none;">
+                Waypoints: ON
+            </button>
+            <button id="unitToggle" class="unit-toggle">
+                Units: mi
+            </button>
+        </div>
     </div>
 </main>
 
