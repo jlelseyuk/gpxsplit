@@ -306,23 +306,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Allow removing split point on marker click
         marker.on('click', () => {
+            // Remove marker from map and array
             map.removeLayer(marker);
             splitMarkers = splitMarkers.filter(m => m !== marker);
 
-            updateSplitList();
+            // Hide split list and download section
+            splitSection.style.display = 'none';
+            document.getElementById('downloadSection').style.display = 'none';
 
             hasExported = false;
-            document.getElementById('downloadSection').style.display = 'none';
 
             updateStepBar();
 
+            // Disable export if no splits left
             document.getElementById('exportBtn').disabled = splitMarkers.length === 0;
         });
 
         splitMarkers.push(marker);
-
-        updateSplitList();
-
         hasExported = false;
 
         document.getElementById('exportBtn').disabled = false;
@@ -485,6 +485,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const downloadList = document.getElementById('downloadList');
         const downloadSection = document.getElementById('downloadSection');
 
+        // Show the split list
+        updateSplitList();
+
+        // Show the download list
         downloadList.innerHTML = '';
         downloadSection.style.display = 'block';
 

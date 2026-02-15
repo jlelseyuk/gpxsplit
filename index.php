@@ -23,13 +23,13 @@ include 'header.php';
         </form>
 
         <div id="splitSection" class="splits" style="display: none;">
-            <h2>Splits:</h2>
+            <h2>Split points:</h2>
 
             <div id="splitList" class="split-list"></div>
         </div>
 
         <div id="downloadSection" class="download" style="display: none;">
-            <h2>Download split files:</h2>
+            <h2>Download sequential split files:</h2>
 
             <div id="downloadList" class="download-list"></div>
 
