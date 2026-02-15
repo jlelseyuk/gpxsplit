@@ -23,7 +23,7 @@ include 'header.php';
         </form>
 
         <div id="splitSection" class="splits" style="display: none;">
-            <h2>Split points:</h2>
+            <h2>Split points added:</h2>
 
             <div id="splitList" class="split-list"></div>
         </div>

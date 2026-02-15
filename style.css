@@ -10,7 +10,7 @@ body {
 }
 h1, h2, h3, h4, h5, h6 {
     margin-top: 0;
-    margin-bottom: 1rem;
+    margin-bottom: .8rem;
 }
 h2 {
     font-size: 18px;
@@ -185,13 +185,8 @@ header .intro {
 .container .splits .split-list {
     font-size: 14px;
 }
-.container .splits .split-list .split-row {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-}
 .container .download {
-    margin-top: 10px;
+    margin-top: 16px;
 }
 .container .download .reset-button {
     background-color: #881515;

@@ -382,17 +382,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         splitMarkers.forEach((marker, index) => {
             const distance = marker._distance;
-            const ele = marker._ele;
-            const distStr = useMiles ? (distance / 1609.344).toFixed(2) + ' mi' : (distance / 1000).toFixed(2) + ' km';
-            const eleStr = ele !== null ? useMiles ? (ele * 3.28084).toFixed(0) + ' ft' : ele + ' m' : '-';
+            const distStr = useMiles ? (distance / 1609.344).toFixed(1) + ' mi' : (distance / 1000).toFixed(1) + ' km';
 
             const row = document.createElement('div');
             row.className = 'split-row';
-            row.innerHTML = `
-                <span style="width: 60px;"><strong>Split ${index + 1}</strong></span>
-                <span style="width: 150px;">Distance: ${distStr}</span>
-                <span style="width: 150px;">Elevation: ${eleStr}</span>
-            `;
+            row.innerHTML = `<span><strong>Split ${index + 1}</strong></span> at <span>${distStr}</span>`;
 
             splitList.appendChild(row);
         });
@@ -400,15 +394,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Content for the split points popups
     function getSplitPopupContent(splitNumber, distance, ele) {
-        const eleStr = ele !== null ? useMiles ? `Elevation: ${(ele * 3.28084).toFixed(0)} ft<br>` : `Elevation: ${ele} m<br>` : '';
-        const distStr = useMiles ? (distance / 1609.344).toFixed(2) + ' mi' : (distance / 1000).toFixed(2) + ' km';
+        const distStr = useMiles ? (distance / 1609.344).toFixed(1) + ' mi' : (distance / 1000).toFixed(1) + ' km';
+        const eleStr = ele !== null ? useMiles ? `Elevation: ${Math.round(ele * 3.28084)} ft<br>` : `Elevation: ${Math.round(ele)} m<br>` : '';
         return `<strong>Split ${splitNumber}</strong><br>Distance: ${distStr}<br>${eleStr}`;
     }
 
     // Content for the waypoint popup
     function getWaypointPopupContent(wpt) {
-        const eleStr = wpt.ele !== null ? useMiles ? `Elevation: ${(wpt.ele * 3.28084).toFixed(0)} ft<br>` : `Elevation: ${wpt.ele} m<br>` : '';
-        const distStr = useMiles ? (wpt.distance / 1609.344).toFixed(2) + ' mi' : (wpt.distance / 1000).toFixed(2) + ' km';
+        const distStr = useMiles ? (wpt.distance / 1609.344).toFixed(1) + ' mi' : (wpt.distance / 1000).toFixed(1) + ' km';
+        const eleStr = wpt.ele !== null ? useMiles ? `Elevation: ${Math.round(wpt.ele * 3.28084)} ft<br>` : `Elevation: ${Math.round(wpt.ele)} m<br>` : '';
         return `<strong>${wpt.name}</strong><br>Type: ${wpt.type}<br>Distance: ${distStr}<br>${eleStr}`;
     }
 
