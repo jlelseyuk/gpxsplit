@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let waypointMarkers = [];
     let waypointsVisible = true;
     let distanceMarkers = [];
-    let useMiles = true;
+    let useMiles = false;
 
     // Custom Leaflet icons for start, end and split points
     const startIcon = new L.Icon({
@@ -89,7 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             });
 
-            updateSplitList();
+            // Only update split list if we have exported
+            if (hasExported) {
+                updateSplitList();
+            }
 
             waypointMarkers.forEach((marker, i) => {
                 const wpt = waypoints[i];

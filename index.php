@@ -45,7 +45,7 @@ include 'header.php';
                 Waypoints: ON
             </button>
             <button id="unitToggle" class="unit-toggle">
-                Units: mi
+                Units: km
             </button>
         </div>
     </div>
