@@ -516,7 +516,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Calculate distance
             const meters = calculateSegmentDistance(pts);
-            const distanceStr = useMiles ? (meters / 1609.344).toFixed(1) + ' mi' : (meters / 1000).toFixed(1) + ' km';
+            const km = (meters / 1000).toFixed(1);
+            const mi = (meters / 1609.344).toFixed(1);
+            const distanceStr = `${km} km (${mi} mi)`;
 
             const link = document.createElement('a');
             link.href = url;
