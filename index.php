@@ -55,6 +55,6 @@ include 'header.php';
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script src="/script.js?v=<?= filemtime('script.js') ?>"></script>
+<script src="/script.js?v=<?php echo filemtime('script.js'); ?>"></script>
 
 <?php include 'base.php'; ?>
