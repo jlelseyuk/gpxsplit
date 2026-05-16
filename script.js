@@ -209,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nameNode = wpt.getElementsByTagName('name')[0];
             const typeNode = wpt.getElementsByTagName('type')[0];
             const symNode  = wpt.getElementsByTagName('sym')[0];
+            const cmtNode = wpt.getElementsByTagName('cmt')[0];
             const lat = parseFloat(wpt.getAttribute('lat'));
             const lon = parseFloat(wpt.getAttribute('lon'));
             const distance = getDistanceAlongTrack(lat, lon);
@@ -219,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lon,
                 ele: ele !== null ? Math.round(ele) : null,
                 name: nameNode ? nameNode.textContent : 'Point',
+                cmt: cmtNode ? cmtNode.textContent : '',
                 type: typeNode ? typeNode.textContent : 'Generic',
                 sym: symNode ? symNode.textContent : 'Waypoint',
                 distance: distance
@@ -403,7 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function getWaypointPopupContent(wpt) {
         const distStr = useMiles ? (wpt.distance / 1609.344).toFixed(1) + ' mi' : (wpt.distance / 1000).toFixed(1) + ' km';
         const eleStr = wpt.ele !== null ? useMiles ? `Elevation: ${Math.round(wpt.ele * 3.28084)} ft<br>` : `Elevation: ${Math.round(wpt.ele)} m<br>` : '';
-        return `<strong>${wpt.name}</strong><br>Type: ${wpt.type}<br>Distance: ${distStr}<br>${eleStr}`;
+        const cmtStr = wpt.cmt ? `Comment: ${wpt.cmt}<br>` : '';
+        return `<strong>${wpt.name}</strong><br>${cmtStr}Type: ${wpt.type}<br>Distance: ${distStr}<br>${eleStr}`;
     }
 
     // Find the index of the nearest route point to a clicked lat/lng
@@ -537,16 +540,52 @@ document.addEventListener('DOMContentLoaded', () => {
         setStep(3);
     }
 
+    // Escape special XML characters so GPX remains valid
+    function escapeXml(value) {
+        if (value === null || value === undefined) return '';
+
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&apos;');
+    }
+
     // Generate a GPX Blob for a given segment
     function generateGPXBlob(points, partNumber = 1, baseName) {
+        // Escape track/route name
+        const safeName = escapeXml(`${baseName} - Part ${partNumber}`);
+
         // Track points
-        const trkpts = points.map(p => `<trkpt lat="${p.lat}" lon="${p.lon}">${p.ele !== null ? `<ele>${p.ele}</ele>` : ``}</trkpt>`).join('');
+        const trkpts = points.map(p =>
+            `<trkpt lat="${p.lat}" lon="${p.lon}">` +
+            `${p.ele !== null ? `<ele>${p.ele}</ele>` : ''}` +
+            `</trkpt>`
+        ).join('');
 
-        // Waypoints (optional) with name, type and symbol
-        const wptStr = waypoints.map(wpt => `<wpt lat="${wpt.lat}" lon="${wpt.lon}">${wpt.ele !== null ? `<ele>${wpt.ele}</ele>` : ``}${wpt.name ? `<name>${wpt.name}</name>` : ``}${wpt.type ? `<type>${wpt.type}</type>` : ``}${wpt.sym ? `<sym>${wpt.sym}</sym>` : ``}</wpt>`).join('');
+        // Waypoints with XML-escaped text fields
+        const wptStr = waypoints.map(wpt =>
+            `<wpt lat="${wpt.lat}" lon="${wpt.lon}">` +
+            `${wpt.ele !== null ? `<ele>${wpt.ele}</ele>` : ''}` +
+            `${wpt.name ? `<name>${escapeXml(wpt.name)}</name>` : ''}` +
+            `${wpt.cmt ? `<cmt>${escapeXml(wpt.cmt)}</cmt>` : ''}` +
+            `${wpt.type ? `<type>${escapeXml(wpt.type)}</type>` : ''}` +
+            `${wpt.sym ? `<sym>${escapeXml(wpt.sym)}</sym>` : ''}` +
+            `</wpt>`
+        ).join('');
 
-        // Assemble full GPX
-        const gpx = `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPX Route Splitter" xmlns="http://www.topografix.com/GPX/1/1"><metadata><name>${baseName} - Part ${partNumber}</name></metadata>${wptStr}<trk><name>${baseName} - Part ${partNumber}</name><trkseg>${trkpts}</trkseg></trk></gpx>`;
+        // Assemble GPX
+        const gpx =
+            `<?xml version="1.0" encoding="UTF-8"?>` +
+            `<gpx version="1.1" creator="GPX Route Splitter" xmlns="http://www.topografix.com/GPX/1/1">` +
+            `<metadata><name>${safeName}</name></metadata>` +
+            `${wptStr}` +
+            `<trk>` +
+            `<name>${safeName}</name>` +
+            `<trkseg>${trkpts}</trkseg>` +
+            `</trk>` +
+            `</gpx>`;
 
         return new Blob([gpx], { type: 'application/gpx+xml' });
     }
