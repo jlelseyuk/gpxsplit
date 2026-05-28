@@ -26,8 +26,7 @@ ServerSignature Off
 
 # Protect .htaccess file
 <Files .htaccess>
-    Order allow,deny
-    Deny from all
+    Require all denied
 </Files>
 
 # Set MIME types for security
@@ -70,6 +69,5 @@ FileETag None
 
 # Prevent access to backup and source files
 <FilesMatch "\.(bak|config|sql|ini|log|sh|swp|dist)$">
-    Order allow,deny
-    Deny from all
+    Require all denied
 </FilesMatch>
