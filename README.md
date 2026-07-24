@@ -80,7 +80,7 @@ When you click the map:
 
 ### 4. Export
 
-Each segment is converted back into valid GPX XML (`.gpx`) and make available as a downloadable file.
+Each segment is converted back into valid XML and made available as downloadable `.gpx` file(s).
 
 ---
 
@@ -88,9 +88,11 @@ Each segment is converted back into valid GPX XML (`.gpx`) and make available as
 
 - Maximum of 10 split points
 - Splits are snapped to nearest track point
-- No server-side processing (everything runs in your browser)
-- Large route/tracks may reduce performance
-- No data is saved to a server
+- No server-side processing (everything runs in your browser, using your system's memory)
+- Close the browser and the memory is freed
+- Refresh the page and your edits and splits will be lost
+- Large route/tracks may reduce performance, but it's unlikely
+- No data is saved to server cache or a database
 
 ---
 
