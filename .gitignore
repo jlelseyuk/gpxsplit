@@ -1,0 +1,8 @@
+.DS_Store
+.Trashes
+.idea
+.vscode
+.well-known
+*.sql
+*.log
+*_log
