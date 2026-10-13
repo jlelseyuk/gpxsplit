@@ -106,4 +106,3 @@ Each segment is converted back into valid XML and made available as downloadable
 ## License
 
 MIT
-
